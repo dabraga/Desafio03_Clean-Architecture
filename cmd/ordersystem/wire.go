@@ -6,14 +6,13 @@ package main
 import (
 	"database/sql"
 
-	"cleanarch/internal/entity"
-	"cleanarch/internal/event"
-	"cleanarch/internal/infra/database"
-	"cleanarch/internal/infra/web"
-	"cleanarch/internal/usecase"
-	"cleanarch/pkg/events"
-
 	"github.com/google/wire"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/entity"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/event"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/infra/database"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/infra/web"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/usecase"
+	"github.com/luiscovelo/goexpert-clean-arch/pkg/events"
 )
 
 var setOrderRepositoryDependency = wire.NewSet(

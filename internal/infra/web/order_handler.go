@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"cleanarch/internal/entity"
-	"cleanarch/internal/usecase"
-	"cleanarch/pkg/events"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/entity"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/usecase"
+	"github.com/luiscovelo/goexpert-clean-arch/pkg/events"
 )
 
 type WebOrderHandler struct {
@@ -48,9 +48,9 @@ func (h *WebOrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *WebOrderHandler) List(w http.ResponseWriter, r *http.Request) {
-	listOrder := usecase.NewListOrdersUseCase(h.OrderRepository)
-	output, err := listOrder.Execute()
+func (h *WebOrderHandler) FindAll(w http.ResponseWriter, r *http.Request) {
+	listOrdersUsecase := usecase.NewListOrdersUseCase(h.OrderRepository)
+	output, err := listOrdersUsecase.Execute()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -60,6 +60,4 @@ func (h *WebOrderHandler) List(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Add("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
 }

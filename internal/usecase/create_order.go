@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"cleanarch/internal/entity"
-	"cleanarch/pkg/events"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/entity"
+	"github.com/luiscovelo/goexpert-clean-arch/pkg/events"
 )
 
 type OrderInputDTO struct {

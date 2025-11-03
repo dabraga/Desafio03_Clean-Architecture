@@ -1,6 +1,6 @@
 package graph
 
-import "cleanarch/internal/usecase"
+import "github.com/luiscovelo/goexpert-clean-arch/internal/usecase"
 
 // This file will not be regenerated automatically.
 //
@@ -8,5 +8,5 @@ import "cleanarch/internal/usecase"
 
 type Resolver struct {
 	CreateOrderUseCase usecase.CreateOrderUseCase
-	ListOrderUseCase   usecase.ListOrdersUseCase
+	ListOrdersUsecase  usecase.ListOrdersUseCase
 }

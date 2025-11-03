@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 
-	"cleanarch/internal/entity"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/entity"
 )
 
 type OrderRepository struct {
@@ -27,33 +27,20 @@ func (r *OrderRepository) Save(order *entity.Order) error {
 }
 
 func (r *OrderRepository) FindAll() ([]entity.Order, error) {
-	rows, err := r.Db.Query("SELECT id, price, tax, final_price from orders")
+	rows, err := r.Db.Query("select id, price, tax, final_price from orders")
 	if err != nil {
 		return nil, err
 	}
+
 	var orders []entity.Order
+
 	for rows.Next() {
-		var id string
-		var price, tax, finalPrice float64
-		err := rows.Scan(&id, &price, &tax, &finalPrice)
+		var order entity.Order
+		err := rows.Scan(&order.ID, &order.Price, &order.Tax, &order.FinalPrice)
 		if err != nil {
 			return nil, err
 		}
-		orders = append(orders, entity.Order{
-			ID:         id,
-			Price:      price,
-			Tax:        tax,
-			FinalPrice: finalPrice,
-		})
+		orders = append(orders, order)
 	}
 	return orders, nil
-}
-
-func (r *OrderRepository) GetTotal() (int, error) {
-	var total int
-	err := r.Db.QueryRow("Select count(*) from orders").Scan(&total)
-	if err != nil {
-		return 0, err
-	}
-	return total, nil
 }

@@ -6,16 +6,15 @@ import (
 	"net"
 	"net/http"
 
-	"cleanarch/configs"
-	"cleanarch/internal/event/handler"
-	"cleanarch/internal/infra/graph"
-	"cleanarch/internal/infra/grpc/pb"
-	"cleanarch/internal/infra/grpc/service"
-	"cleanarch/internal/infra/web/webserver"
-	"cleanarch/pkg/events"
-
 	graphql_handler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/luiscovelo/goexpert-clean-arch/configs"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/event/handler"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/infra/graph"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/infra/grpc/pb"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/infra/grpc/service"
+	"github.com/luiscovelo/goexpert-clean-arch/internal/infra/web/webserver"
+	"github.com/luiscovelo/goexpert-clean-arch/pkg/events"
 	"github.com/streadway/amqp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -35,10 +34,6 @@ func main() {
 		panic(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS orders (id varchar(255) NOT NULL, price float NOT NULL, tax float NOT NULL, final_price float NOT NULL, PRIMARY KEY (id))")
-	if err != nil {
-		panic(err)
-	}
 
 	rabbitMQChannel := getRabbitMQChannel()
 
@@ -48,17 +43,17 @@ func main() {
 	})
 
 	createOrderUseCase := NewCreateOrderUseCase(db, eventDispatcher)
-	listOrderUseCase := NewListOrdersUseCase(db)
+	listOrdersUseCase := NewListOrdersUseCase(db)
 
 	webserver := webserver.NewWebServer(configs.WebServerPort)
 	webOrderHandler := NewWebOrderHandler(db, eventDispatcher)
-	webserver.Router.Post("/order", webOrderHandler.Create)
-	webserver.Router.Get("/order", webOrderHandler.List)
+	webserver.AddHandler(http.MethodPost, "/order", webOrderHandler.Create)
+	webserver.AddHandler(http.MethodGet, "/order", webOrderHandler.FindAll)
 	fmt.Println("Starting web server on port", configs.WebServerPort)
 	go webserver.Start()
 
 	grpcServer := grpc.NewServer()
-	createOrderService := service.NewOrderService(*createOrderUseCase, *listOrderUseCase)
+	createOrderService := service.NewOrderService(*createOrderUseCase, *listOrdersUseCase)
 	pb.RegisterOrderServiceServer(grpcServer, createOrderService)
 	reflection.Register(grpcServer)
 
@@ -71,7 +66,7 @@ func main() {
 
 	srv := graphql_handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		CreateOrderUseCase: *createOrderUseCase,
-		ListOrderUseCase:   *listOrderUseCase,
+		ListOrdersUsecase:  *listOrdersUseCase,
 	}}))
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
@@ -81,7 +76,7 @@ func main() {
 }
 
 func getRabbitMQChannel() *amqp.Channel {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/") //make it an env config
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		panic(err)
 	}
